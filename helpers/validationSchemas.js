@@ -38,4 +38,26 @@ const registerUserValidationSchema = {
 	},
 };
 
-module.exports = registerUserValidationSchema;
+const createWorkspaceValidationSchema = {
+    name: {
+        isString: {
+            errorMessage: "Workspace name must be a string!"
+        },
+        notEmpty: {
+            errorMessage: "Workspace name cannot be empty"
+        },
+        isLength: {
+            options: {
+                min: 1,
+                max: 100
+            },
+            errorMessage: "Workspace name must be at least 5 charachters with a max of 100",
+        }
+    }
+};
+
+
+module.exports = {
+	registerUserValidationSchema, 
+	createWorkspaceValidationSchema
+}
