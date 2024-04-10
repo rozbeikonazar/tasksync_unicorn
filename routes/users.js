@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const {hashPassword} = require('../helpers/users.js')
-const registerUserValidationSchema = require('../helpers/validationSchemas.js')
+const {registerUserValidationSchema} = require('../helpers/validationSchemas.js')
 const {validationResult , checkSchema, matchedData} = require('express-validator');
 const passport = require('passport')
 const User = require('../mongoose/schemas/user.js')
@@ -39,9 +39,9 @@ router.post('/register', checkSchema(registerUserValidationSchema), async (req, 
   if (!errors.isEmpty()){
     return res.status(422).json({ errors: errors.array() });
   }
-  data.password = await hashPassword(data.password);
-  const newUser = new User(data);
   try{
+    data.password = await hashPassword(data.password);
+    const newUser = new User(data);
     const savedUser = await newUser.save();
     return res.status(201).send(savedUser)
   }
