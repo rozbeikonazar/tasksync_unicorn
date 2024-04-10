@@ -3,6 +3,7 @@ const express = require('express');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const users = require('./routes/users');
+const workspaces = require('./routes/workspaces')
 const session = require('express-session');
 const passport = require('passport');
 const mongoose = require('mongoose');
@@ -35,6 +36,7 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 app.use('/api/user', users.router);
+app.use('/api/workspaces', workspaces.router)
 
 app.use(function (err, req, res, next) {
   console.error(err);
