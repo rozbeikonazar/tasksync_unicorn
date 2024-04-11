@@ -50,9 +50,10 @@ WorkspaceSchema.pre("deleteMany", async function (next) {
         // find all workspaces associated with the creator_id
         const workspaces = await Workspace.find({creator_id: creator_id});
         const workspaceIDs = workspaces.map(workspace => workspace._id);
-        await Invintation.deleteMany({workspace_id: {$in: workspaceIDs }});
+        // Remove related documents from UserWorkspaceInvintation collection
         await UserWorkspaceInvintation.deleteMany({workspace_id: {$in: workspaceIDs}});
-
+        // Remove related documents from Invintation collection
+        await Invintation.deleteMany({workspace_id: {$in: workspaceIDs }});
         next();   
     }
     catch (error) {
