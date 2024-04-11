@@ -15,6 +15,7 @@ const InvintationSchema = new mongoose.Schema({
 });
 
 
-const Invintation = mongoose.model('InvintationSchema', UserSchema);
+const Invintation = mongoose.model('Invintation', InvintationSchema);
 
 module.exports = Invintation;
+
