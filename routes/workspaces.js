@@ -3,9 +3,11 @@ const router = express.Router();
 const checkAuth = require('../middlewares/checkAuth');
 const handleValidationErrors = require("../middlewares/handleValidationErrors.js")
 const isWorkspaceCreator = require("../middlewares/isWorkspaceCreator.js")
-const {createWorkspaceValidationSchema} = require('../helpers/validationSchemas.js')
+const checkWorkspaceAccess = require("../middlewares/checkWorkspaceAccess.js")
+const {workspaceValidationSchema, createTaskValidationSchema, updateTaskValidationSchema} = require('../helpers/validationSchemas.js')
 const { checkSchema, matchedData} = require('express-validator');
 const {Workspace, UserWorkspaceInvintation} = require('../mongoose/schemas/workspace.js')
+const Task = require('../mongoose/schemas/task.js')
 const Invintation = require("../mongoose/schemas/invintation.js")
 const { v4: uuidv4 } = require('uuid');
 const HOST = process.env.HOST || 'localhost:3000';
@@ -13,7 +15,7 @@ const WORKSPACE_PREFIX = process.env.WORKSPACE_PREFIX || '/api/workspaces/'
 
 router.post("/", 
 checkAuth, 
-checkSchema(createWorkspaceValidationSchema), 
+checkSchema(workspaceValidationSchema), 
 handleValidationErrors, 
 async function(req, res){
     // Creates new workspace
@@ -35,8 +37,6 @@ async function(req, res){
     }
 })
 
-
-
 router.get("/", checkAuth, async function(req, res){
     // returns all workspaces assigned to user
     try {
@@ -55,11 +55,31 @@ router.get("/", checkAuth, async function(req, res){
 
 })
 
+router.put("/:workspaceID", 
+checkAuth, isWorkspaceCreator, checkSchema(workspaceValidationSchema), handleValidationErrors,
+async function (req,res) {
+    const data = matchedData(req);
+    const {workspaceID} = req.params
+    try {
+        const updatedWorkspace = await Workspace.findByIdAndUpdate(workspaceID, {$set: data}, {new: true});
+        if (!updatedWorkspace) {
+            res.status(404).json({error: "Workspace not found"})
+        }
+        res.status(200).json(updatedWorkspace)
+    }
+    catch (err) {
+        if (err.name === 'ValidationError') {
+            return res.status(422).json({ error: "Validation failed" });
+        }
+        return res.status(500).json({ error: "Internal Server Error" });
+    }
+})
+
 router.delete("/:workspaceID", checkAuth, isWorkspaceCreator, async function(req, res) {
     try {
         const result = await Workspace.deleteOne({_id: req.workspace._id});
         if (!result) {
-            res.status(500).json({ error: "Workspace deletion failed." });
+            res.status(422).json({ error: "Workspace deletion failed." });
         }
         res.status(200).json({ message: `Workspace deleted successfully.`});
 
@@ -167,6 +187,100 @@ router.post('/:uuid/join', checkAuth, async function(req, res) {
     
     } 
     })
+
+
+// CRUD for Task
+
+router.post('/:workspaceID/create_task', 
+checkAuth, checkWorkspaceAccess, checkSchema(createTaskValidationSchema), handleValidationErrors,
+ async function(req, res) {
+    const userID = req.user
+    const {workspaceID} = req.params
+    const data = matchedData(req)
+    try {
+        const newTask = new Task({
+            name: data.name,
+            description: data.description,
+            deadline: data.deadline,
+            status: data.status,
+            assignee_id: userID,
+            workspace_id: workspaceID
+        })
+        const savedTask = await newTask.save()
+        return res.status(201).json(savedTask)
+    }
+    catch (err){
+        if (err.name === 'ValidationError'){
+            return res.status(422).json({ error: "Validation failed" });
+        }
+        console.log("Error:", err);
+        return res.status(500).json({ error: "Internal server error" });    
+    };
+} )
+
+router.get('/:workspaceID/tasks', checkAuth, checkWorkspaceAccess, async function(req, res) {
+    const {workspaceID} = req.params
+    try {
+        const tasks = await Task.find({workspace_id: workspaceID})
+        res.status(200).json(tasks)
+    }
+    catch(err) {
+        return res.status(500).json({ error: "Internal Server Error" });
+
+    }
+})
+
+
+router.get('/:workspaceID/tasks/:taskID', checkAuth, checkWorkspaceAccess, async function(req, res){
+
+    const {workspaceID, taskID} = req.params
+    try {
+        const task = await Task.findOne({_id: taskID, workspace_id: workspaceID})
+        res.status(200).json(task)
+
+    }
+    catch(err) {
+        return res.status(500).json({ error: "Internal Server Error" });
+    }
+})
+
+
+router.put('/:workspaceID/tasks/:taskID',
+    checkAuth, checkWorkspaceAccess, checkSchema(updateTaskValidationSchema), handleValidationErrors,
+    async function(req, res) {
+    const data = matchedData(req);
+    const { taskID } = req.params;
+
+    try {
+        const updatedTask = await Task.findByIdAndUpdate(taskID, { $set: data }, { new: true });        
+        if (!updatedTask) {
+            return res.status(404).json({ error: "Task not found" });
+        }
+        res.status(200).json(updatedTask);
+    } catch (err) {
+        if (err.name === 'ValidationError') {
+            return res.status(422).json({ error: "Validation failed" });
+        }
+        return res.status(500).json({ error: "Internal Server Error" });
+    }
+});
+
+
+router.delete('/:workspaceID/tasks/:taskID', checkAuth, checkWorkspaceAccess, async function(req, res) {
+    const {taskID} = req.params
+    try {
+        const result = await Task.deleteOne({_id: taskID})
+        if (!result) {
+            res.status(422).json({error: "Task deletion failed"})
+        }
+        res.status(200).json({ message: `Task deleted successfully.`});
+    
+    } catch(err){
+        res.status(500).json({error: "Internal Server Error"})
+
+    }
+})
+
 
 module.exports = {
     router,
