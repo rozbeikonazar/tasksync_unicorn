@@ -8,7 +8,7 @@ const isWorkspaceCreator = async (req, res, next) => {
         const workspace = await Workspace.findOne({ _id: workspaceID, creator_id: userID });
         
         if (!workspace) {
-            return res.status(404).json({ error: "Workspace not found or you are not the creator." });
+            return res.status(403).json({ error: "You don't have permission to perform this action in the workspace." });
         }
         req.workspace = workspace;
         next()
