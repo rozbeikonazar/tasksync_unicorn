@@ -1,6 +1,6 @@
 const mongoose = require('mongoose')
 const Invintation = require("./invintation.js")
-const User = require('./user.js')
+const Task = require('./task.js')
 const WorkspaceSchema = new mongoose.Schema({
     name: {
         type: mongoose.Schema.Types.String,
@@ -38,6 +38,8 @@ WorkspaceSchema.pre("deleteOne", async function (next) {
         await UserWorkspaceInvintation.deleteMany({ workspace_id: workspaceID });
         // Remove related documents from Invintation collection
         await Invintation.deleteMany({ workspace_id: workspaceID});
+        // Remove related documents from Task collection
+        await Task.deleteMany({workspace_id: workspaceID});
         next();
     } catch (error) {
         next(error);
@@ -54,6 +56,8 @@ WorkspaceSchema.pre("deleteMany", async function (next) {
         await UserWorkspaceInvintation.deleteMany({workspace_id: {$in: workspaceIDs}});
         // Remove related documents from Invintation collection
         await Invintation.deleteMany({workspace_id: {$in: workspaceIDs }});
+        // Remove related documents from Task collection
+        await Task.deleteMany({workspace_id: {$in: workspaceIDs}});
         next();   
     }
     catch (error) {
