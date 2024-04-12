@@ -48,10 +48,9 @@ const workspaceValidationSchema = {
         },
         isLength: {
             options: {
-                min: 1,
                 max: 100
             },
-            errorMessage: "Workspace name must be at least 5 charachters with a max of 100",
+            errorMessage: "Workspace name must have a maximum length of 100 characters",
         }
     }
 };
@@ -59,16 +58,16 @@ const workspaceValidationSchema = {
 const createTaskValidationSchema = {
     name: {
         notEmpty: {
-            errorMessage: 'Name is required',
+            errorMessage: 'Task name is required',
         },
 		isString: {
-            errorMessage: "Name must be a string!"
+            errorMessage: "Task name must be a string!"
         },
     },
     description: {
         optional: true,
 		isString: {
-			errorMessage: 'Description must be a string',
+			errorMessage: 'Task description must be a string',
 		},
     },
     deadline: {
@@ -90,14 +89,14 @@ const createTaskValidationSchema = {
 const updateTaskValidationSchema = {
     name: {
 		isString: {
-            errorMessage: "Name must be a string!"
+            errorMessage: "Task name must be a string!"
         },
 		optional: true,
     },
     description: {
         optional: true,
 		isString: {
-			errorMessage: 'Description must be a string',
+			errorMessage: 'Task description must be a string',
 		},
     },
     deadline: {
@@ -116,10 +115,28 @@ const updateTaskValidationSchema = {
     },
 };
 
+const commentValidationSchema = {
+    content: {
+        isString: {
+            errorMessage: "Comment content must be a string",
+        },
+        notEmpty: {
+            errorMessage: "Comment content cannot be empty"
+        },
+        isLength: {
+            options: {
+                max: 300
+            },
+            errorMessage: "Comment content must have a maximum length of 300 characters",
+        }
+    }
+}
+
 
 module.exports = {
 	registerUserValidationSchema, 
 	workspaceValidationSchema,
 	createTaskValidationSchema,
-	updateTaskValidationSchema
+	updateTaskValidationSchema,
+    commentValidationSchema,
 }
