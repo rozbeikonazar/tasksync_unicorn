@@ -4,10 +4,12 @@ const checkAuth = require('../middlewares/checkAuth');
 const handleValidationErrors = require("../middlewares/handleValidationErrors.js")
 const isWorkspaceCreator = require("../middlewares/isWorkspaceCreator.js")
 const checkWorkspaceAccess = require("../middlewares/checkWorkspaceAccess.js")
-const {workspaceValidationSchema, createTaskValidationSchema, updateTaskValidationSchema} = require('../helpers/validationSchemas.js')
+const checkCommentOwnership = require('../middlewares/checkCommentOwnership.js')
+const {workspaceValidationSchema, createTaskValidationSchema, updateTaskValidationSchema, commentValidationSchema} = require('../helpers/validationSchemas.js')
 const { checkSchema, matchedData} = require('express-validator');
 const {Workspace, UserWorkspaceInvintation} = require('../mongoose/schemas/workspace.js')
 const Task = require('../mongoose/schemas/task.js')
+const Comment = require('../mongoose/schemas/comment.js')
 const Invintation = require("../mongoose/schemas/invintation.js")
 const { v4: uuidv4 } = require('uuid');
 const HOST = process.env.HOST || 'localhost:3000';
@@ -213,7 +215,6 @@ checkAuth, checkWorkspaceAccess, checkSchema(createTaskValidationSchema), handle
         if (err.name === 'ValidationError'){
             return res.status(422).json({ error: "Validation failed" });
         }
-        console.log("Error:", err);
         return res.status(500).json({ error: "Internal server error" });    
     };
 } )
@@ -280,6 +281,62 @@ router.delete('/:workspaceID/tasks/:taskID', checkAuth, checkWorkspaceAccess, as
 
     }
 })
+
+// CRUD for comments
+
+router.post('/:workspaceID/tasks/:taskID/write_comment', 
+checkAuth, checkWorkspaceAccess, checkSchema(commentValidationSchema), handleValidationErrors, 
+async function(req,res){
+    const userID = req.user
+    const {taskID} = req.params
+    const data = matchedData(req);
+    try {
+        const newComment = new Comment({
+            content: data.content,
+            task_id: taskID,
+            commenter_id: userID,
+        });
+        const savedComment = await newComment.save()
+        return res.status(201).json(savedComment)
+
+    } catch(err){
+        if (err.name === 'ValidationError'){
+            return res.status(422).json({ error: "Validation failed" });
+        }
+        return res.status(500).json({ error: "Internal server error" });  
+    }
+
+})
+
+router.get('/:workspaceID/tasks/:taskID/comments', checkAuth, checkWorkspaceAccess, async function(req,res) {
+    const {taskID} = req.params
+    try {
+        const comments = await Comment.find({task_id: taskID})
+        res.status(200).json(comments)
+    } catch(err) {
+        return res.status(500).json({error: "Internal Server Error"});
+    }
+})
+
+
+router.delete('/:workspaceID/tasks/:taskID/:commentID', 
+checkAuth, checkWorkspaceAccess, checkCommentOwnership,
+async function(req, res) {
+    const {commentID} = req.params
+    try {
+        const result = await Comment.deleteOne({_id: commentID})
+        if (!result) {
+            res.status(422).json({error: "Comment deletion failed"})
+        }
+        res.status(200).json({message: "Comment deleted successfully"})
+    }
+    catch(err) {
+        res.status(500).json({error: "Internal Server Error"})
+
+    }
+
+})
+
 
 
 module.exports = {
