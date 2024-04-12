@@ -38,7 +38,7 @@ const registerUserValidationSchema = {
 	},
 };
 
-const createWorkspaceValidationSchema = {
+const workspaceValidationSchema = {
     name: {
         isString: {
             errorMessage: "Workspace name must be a string!"
@@ -56,8 +56,70 @@ const createWorkspaceValidationSchema = {
     }
 };
 
+const createTaskValidationSchema = {
+    name: {
+        notEmpty: {
+            errorMessage: 'Name is required',
+        },
+		isString: {
+            errorMessage: "Name must be a string!"
+        },
+    },
+    description: {
+        optional: true,
+		isString: {
+			errorMessage: 'Description must be a string',
+		},
+    },
+    deadline: {
+        optional: true,
+        isISO8601: {
+            errorMessage: 'Invalid deadline format',
+        },
+        toDate: true,
+    },
+    status: {
+        optional: true,
+        isIn: {
+            options: [['Done', 'In progress', 'Not started']],
+            errorMessage: 'Invalid status',
+        },
+    },
+};
+
+const updateTaskValidationSchema = {
+    name: {
+		isString: {
+            errorMessage: "Name must be a string!"
+        },
+		optional: true,
+    },
+    description: {
+        optional: true,
+		isString: {
+			errorMessage: 'Description must be a string',
+		},
+    },
+    deadline: {
+        optional: true,
+        isISO8601: {
+            errorMessage: 'Invalid deadline format',
+        },
+        toDate: true,
+    },
+    status: {
+        optional: true,
+        isIn: {
+            options: [['Done', 'In progress', 'Not started']],
+            errorMessage: 'Invalid status',
+        },
+    },
+};
+
 
 module.exports = {
 	registerUserValidationSchema, 
-	createWorkspaceValidationSchema
+	workspaceValidationSchema,
+	createTaskValidationSchema,
+	updateTaskValidationSchema
 }
