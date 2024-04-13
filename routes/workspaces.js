@@ -63,7 +63,12 @@ router.get('/:workspaceID', checkAuth, checkWorkspaceAccess, async function(req,
     try {
         const workspace = await Workspace.find({_id: workspaceID})
         const tasks = await Task.find({workspace_id: workspaceID})
-        return res.status(200).json({"workspace": workspace ,"tasks": tasks})
+        // select invited users to this workspace. It will return only id of the user and his display_name
+        const invitedUsers = await UserWorkspaceInvintation.find({workspace_id: workspaceID}).populate({
+            path: 'user_id',
+            select: 'display_name _id' 
+        }).select('user_id');
+        return res.status(200).json({"workspace": workspace ,"tasks": tasks, "invited_users" : invitedUsers})
     }
     catch(err) {
         return res.status(500).json({ error: "Internal Server Error" });
