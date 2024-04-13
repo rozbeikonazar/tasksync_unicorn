@@ -11,10 +11,12 @@ const handleValidationErrors = require("../middlewares/handleValidationErrors.js
 
 
 router.post('/login', passport.authenticate('local'), function(req, res) {
+  // Check user credentials and set auth cookies for him
   return res.status(200).json({ message: 'Login successful' });
 });
 
 router.post('/logout', (req,res) => {
+  // Logout user and removes auth cookies assigned to him 
   if (!req.user) {
     return res.sendStatus(401);
   }
@@ -29,6 +31,7 @@ router.post('/logout', (req,res) => {
 router.post('/register', 
 checkSchema(registerUserValidationSchema), handleValidationErrors, 
 async (req, res, next) => {
+  // Creates a new user
   const data =  matchedData(req); 
 
   try {
@@ -47,6 +50,10 @@ async (req, res, next) => {
 
 
 router.delete('/delete_account', checkAuth, async(req, res, next) => {
+  // Deletes a User accouns. 
+  // This function also invoke chain of the functions
+  // that will delete all the workspaces, tasks, comments, user workspace invintations, invintation links
+  // that was assigned/created to/by this user
   user_id = req.user._id
   try {
     const result = await User.deleteOne({_id: user_id})
