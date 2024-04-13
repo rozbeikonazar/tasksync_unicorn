@@ -2,6 +2,8 @@ const {Workspace, UserWorkspaceInvintation} = require('../mongoose/schemas/works
 
 
 const checkWorkspaceAccess = async (req, res, next) => {
+    // Checks if user is the creator of the workspace or he invited to it
+    // to allow or not allow him perform actions
     const userID = req.user
     const {workspaceID} = req.params
     try {
