@@ -48,9 +48,7 @@ TaskSchema.pre("deleteMany", async function(next) {
     try {
         const tasks = await Task.find({workspace_id: {$in : workspaceIDs}})
         const taskIDs = tasks.map(task => task._id)
-        console.log("TaskIDS: ", taskIDs)
         await Comment.deleteMany({task_id: {$in: taskIDs}})
-        
         next()
     } catch (err) {
         next(err);
