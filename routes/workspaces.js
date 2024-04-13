@@ -59,6 +59,7 @@ router.get("/", checkAuth, async function(req, res){
 router.put("/:workspaceID", 
 checkAuth, isWorkspaceCreator, checkSchema(workspaceValidationSchema), handleValidationErrors,
 async function (req,res) {
+    // Updates workspace fields. Only creator of the workspace can update it
     const data = matchedData(req);
     const {workspaceID} = req.params
     try {
@@ -77,6 +78,7 @@ async function (req,res) {
 })
 
 router.delete("/:workspaceID", checkAuth, isWorkspaceCreator, async function(req, res) {
+    // Deletes workspace. Only the creator of the workspace can delete it
     try {
         const result = await Workspace.deleteOne({_id: req.workspace._id});
         if (!result) {
@@ -91,6 +93,7 @@ router.delete("/:workspaceID", checkAuth, isWorkspaceCreator, async function(req
 });
 
 router.delete("/:workspaceID/quit", checkAuth, async function(req, res) {
+    // Removes User from the workspace. Creator can't quit his workspace.
     const userID = req.user._id;
     const workspaceID = req.params.workspaceID;
     try {
@@ -112,6 +115,7 @@ router.delete("/:workspaceID/quit", checkAuth, async function(req, res) {
 }) 
 
 router.delete("/:workspaceID/kick/:userID", checkAuth, isWorkspaceCreator, async function(req,res) {
+    // Removes User from the workspace. Only admin can kick a User from the workspace
     userID = req.params.userID
     const workspaceID = req.params.workspaceID;
     try {
@@ -128,6 +132,8 @@ router.delete("/:workspaceID/kick/:userID", checkAuth, isWorkspaceCreator, async
 
 router.post('/:workspaceID/generate_invintation',
     isWorkspaceCreator, async function(req, res) {
+        // generates a one-time invintation link to workspace
+        // Only the creator of the workspace can generate them
         const invitationLink = `${HOST}${WORKSPACE_PREFIX}${uuidv4()}/join`;
         try {
             const newInvintation = new Invintation({
@@ -145,8 +151,10 @@ router.post('/:workspaceID/generate_invintation',
 
 
 router.post('/:uuid/join', checkAuth, async function(req, res) {
-    // by accessing this link, user accept invite
-    // and will be add to DB
+    // Accept invite to the workspace. 
+    // Users that are already present in the workspace can't accept this invite
+    
+
     // Because I have added index that ensures uniqueness combination of user_id and workspace_id
     // I don't have to check if user is already in that workspace.
     const userID = req.user._id
@@ -162,7 +170,6 @@ router.post('/:uuid/join', checkAuth, async function(req, res) {
 
             }
             // if all checks pass, we can add user to the workspace
-
             const newJoin = new UserWorkspaceInvintation({
                 user_id: userID,
                 workspace_id: invitation.workspace_id
@@ -188,9 +195,11 @@ router.post('/:uuid/join', checkAuth, async function(req, res) {
 
 // CRUD for Task
 
-router.post('/:workspaceID/create_task', 
+router.post('/:workspaceID/add_task', 
 checkAuth, checkWorkspaceAccess, checkSchema(createTaskValidationSchema), handleValidationErrors,
  async function(req, res) {
+    //  Adds new task to the workspace
+    // Creator and all the users present in the workspace are able to add tasks
     const userID = req.user
     const {workspaceID} = req.params
     const data = matchedData(req)
@@ -228,7 +237,7 @@ router.get('/:workspaceID/tasks', checkAuth, checkWorkspaceAccess, async functio
 
 
 router.get('/:workspaceID/tasks/:taskID', checkAuth, checkWorkspaceAccess, async function(req, res){
-
+    // Returns a task and the comments assigned to it
     const {workspaceID, taskID} = req.params
     try {
         const task = await Task.findOne({_id: taskID, workspace_id: workspaceID})
@@ -244,25 +253,28 @@ router.get('/:workspaceID/tasks/:taskID', checkAuth, checkWorkspaceAccess, async
 router.put('/:workspaceID/tasks/:taskID',
     checkAuth, checkWorkspaceAccess, checkSchema(updateTaskValidationSchema), handleValidationErrors,
     async function(req, res) {
-    const data = matchedData(req);
-    const { taskID } = req.params;
-
-    try {
-        const updatedTask = await Task.findByIdAndUpdate(taskID, { $set: data }, { new: true });        
-        if (!updatedTask) {
-            return res.status(404).json({ error: "Task not found" });
+        // Updates task fields. Any user present in the workspace can update task
+        // even if he is not the creator of the task
+        const data = matchedData(req);
+        const { taskID } = req.params;
+        try {
+            const updatedTask = await Task.findByIdAndUpdate(taskID, { $set: data }, { new: true });        
+            if (!updatedTask) {
+                return res.status(404).json({ error: "Task not found" });
+            }
+            return res.status(200).json(updatedTask);
+        } catch (err) {
+            if (err.name === 'ValidationError') {
+                return res.status(422).json({ error: "Validation failed" });
+            }
+            return res.status(500).json({ error: "Internal Server Error" });
         }
-        return res.status(200).json(updatedTask);
-    } catch (err) {
-        if (err.name === 'ValidationError') {
-            return res.status(422).json({ error: "Validation failed" });
-        }
-        return res.status(500).json({ error: "Internal Server Error" });
-    }
 });
 
 
 router.delete('/:workspaceID/tasks/:taskID', checkAuth, checkWorkspaceAccess, async function(req, res) {
+    // Deletes task. Any user present in the workspace can delete task
+    // even if he is not the creator of the task
     const {taskID} = req.params
     try {
         const result = await Task.deleteOne({_id: taskID})
@@ -279,9 +291,10 @@ router.delete('/:workspaceID/tasks/:taskID', checkAuth, checkWorkspaceAccess, as
 
 // CRUD for comments
 
-router.post('/:workspaceID/tasks/:taskID/write_comment', 
+router.post('/:workspaceID/tasks/:taskID/add_comment', 
 checkAuth, checkWorkspaceAccess, checkSchema(commentValidationSchema), handleValidationErrors, 
 async function(req,res){
+    // Adds a comment to a task
     const userID = req.user
     const {taskID} = req.params
     const data = matchedData(req);
@@ -317,6 +330,8 @@ router.get('/:workspaceID/tasks/:taskID/comments', checkAuth, checkWorkspaceAcce
 router.delete('/:workspaceID/tasks/:taskID/:commentID', 
 checkAuth, checkWorkspaceAccess, checkCommentOwnership,
 async function(req, res) {
+    // Deletes a comment from the task. Only creator of the workspace
+    // and the author of comment can delete it
     const {commentID} = req.params
     try {
         const result = await Comment.deleteOne({_id: commentID})
