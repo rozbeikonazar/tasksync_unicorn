@@ -56,6 +56,22 @@ router.get("/", checkAuth, async function(req, res){
 
 })
 
+router.get('/:workspaceID', checkAuth, checkWorkspaceAccess, async function(req, res) {
+    // Returns workspace, all tasks assigned to it,
+    // information about creator and/or invited users to this workspace
+    const {workspaceID} = req.params
+    try {
+        const workspace = await Workspace.find({_id: workspaceID})
+        const tasks = await Task.find({workspace_id: workspaceID})
+        return res.status(200).json({"workspace": workspace ,"tasks": tasks})
+    }
+    catch(err) {
+        return res.status(500).json({ error: "Internal Server Error" });
+
+    }
+})
+
+
 router.put("/:workspaceID", 
 checkAuth, isWorkspaceCreator, checkSchema(workspaceValidationSchema), handleValidationErrors,
 async function (req,res) {
@@ -91,6 +107,69 @@ router.delete("/:workspaceID", checkAuth, isWorkspaceCreator, async function(req
         return res.status(500).json({ error: "Internal Server Error" });
     }
 });
+
+// Logic related to Invintation
+
+router.post('/:workspaceID/generate_invintation',
+    isWorkspaceCreator, async function(req, res) {
+        // generates a one-time invintation link to workspace
+        // Only the creator of the workspace can generate them
+        const invitationLink = `${HOST}${WORKSPACE_PREFIX}${uuidv4()}/join`;
+        try {
+            const newInvintation = new Invintation({
+                url: invitationLink,
+                workspace_id: req.workspace._id
+            });
+            const savedLink = await newInvintation.save();
+            return res.status(201).json({"link": savedLink})
+        }
+        catch (err){
+            return res.status(500).json({error: "Internal Server Error"});
+        }
+    }
+)
+
+
+router.post('/:uuid/join', checkAuth, async function(req, res) {
+    // Accept invite to the workspace. 
+    // Users that are already present in the workspace can't accept this invite
+    
+    // Because I have added index that ensures uniqueness combination of user_id and workspace_id
+    // I don't have to check if user is already in that workspace.
+    const userID = req.user._id
+        try{
+            const invitation = await Invintation.findOne({ url: `${HOST}${WORKSPACE_PREFIX}${req.params.uuid}/join` });
+            if (!invitation) {
+                return res.status(404).json({error: "Invintation not found"})
+            }
+            // check if user is creator of the workspace
+            const workspace = await Workspace.findOne({ _id: invitation.workspace_id, creator_id: userID });
+            if (workspace) {
+                return res.status(400).json({error: "User is the creator of the workspace"})
+
+            }
+            // if all checks pass, we can add user to the workspace
+            const newJoin = new UserWorkspaceInvintation({
+                user_id: userID,
+                workspace_id: invitation.workspace_id
+            })
+
+            const joinToWorkspace = await newJoin.save()
+        // This invintation links are one-time, so after user joined to a workspace
+        // this link should be deleted
+        const result = await Invintation.deleteOne(invitation._id)
+        if (!result) {
+            return res.status(500).json({error: "Internal server error"})
+        }
+        return res.status(200).json(joinToWorkspace)
+    }   catch (err) {
+        if (err.code === 11000) {
+            return res.status(422).json({ error: 'User is already a member of this workspace.'});
+        }
+        return res.status(500).json({error: "Internal server error"})
+    
+    } 
+    })
 
 router.delete("/:workspaceID/quit", checkAuth, async function(req, res) {
     // Removes User from the workspace. Creator can't quit his workspace.
@@ -129,70 +208,6 @@ router.delete("/:workspaceID/kick/:userID", checkAuth, isWorkspaceCreator, async
     }
 })
 
-
-router.post('/:workspaceID/generate_invintation',
-    isWorkspaceCreator, async function(req, res) {
-        // generates a one-time invintation link to workspace
-        // Only the creator of the workspace can generate them
-        const invitationLink = `${HOST}${WORKSPACE_PREFIX}${uuidv4()}/join`;
-        try {
-            const newInvintation = new Invintation({
-                url: invitationLink,
-                workspace_id: req.workspace._id
-            });
-            const savedLink = await newInvintation.save();
-            return res.status(201).json({"link": savedLink})
-        }
-        catch (err){
-            return res.status(500).json({error: "Internal Server Error"});
-        }
-    }
-)
-
-
-router.post('/:uuid/join', checkAuth, async function(req, res) {
-    // Accept invite to the workspace. 
-    // Users that are already present in the workspace can't accept this invite
-    
-
-    // Because I have added index that ensures uniqueness combination of user_id and workspace_id
-    // I don't have to check if user is already in that workspace.
-    const userID = req.user._id
-        try{
-            const invitation = await Invintation.findOne({ url: `${HOST}${WORKSPACE_PREFIX}${req.params.uuid}/join` });
-            if (!invitation) {
-                return res.status(404).json({error: "Invintation not found"})
-            }
-            // check if user is creator of the workspace
-            const workspace = await Workspace.findOne({ _id: invitation.workspace_id, creator_id: userID });
-            if (workspace) {
-                return res.status(400).json({error: "User is the creator of the workspace"})
-
-            }
-            // if all checks pass, we can add user to the workspace
-            const newJoin = new UserWorkspaceInvintation({
-                user_id: userID,
-                workspace_id: invitation.workspace_id
-            })
-
-            const joinToWorkspace = await newJoin.save()
-        // This invintation links are one-time, so after user joined to a workspace
-        // this link should be deleted
-        const result = await Invintation.deleteOne(invitation._id)
-        if (!result) {
-            return res.status(500).json({error: "Internal server error"})
-        }
-        return res.status(200).json(joinToWorkspace)
-    }   catch (err) {
-        if (err.code === 11000) {
-            return res.status(422).json({ error: 'User is already a member of this workspace.'});
-        }
-        return res.status(500).json({error: "Internal server error"})
-    
-    } 
-    })
-
-
 // CRUD for Task
 
 router.post('/:workspaceID/add_task', 
@@ -223,25 +238,15 @@ checkAuth, checkWorkspaceAccess, checkSchema(createTaskValidationSchema), handle
     };
 } )
 
-router.get('/:workspaceID/tasks', checkAuth, checkWorkspaceAccess, async function(req, res) {
-    const {workspaceID} = req.params
-    try {
-        const tasks = await Task.find({workspace_id: workspaceID})
-        return res.status(200).json(tasks)
-    }
-    catch(err) {
-        return res.status(500).json({ error: "Internal Server Error" });
-
-    }
-})
 
 
-router.get('/:workspaceID/tasks/:taskID', checkAuth, checkWorkspaceAccess, async function(req, res){
-    // Returns a task and the comments assigned to it
+router.get('/:workspaceID/:taskID', checkAuth, checkWorkspaceAccess, async function(req, res){
+    // Returns a task and the comments that assigned to it
     const {workspaceID, taskID} = req.params
     try {
         const task = await Task.findOne({_id: taskID, workspace_id: workspaceID})
-        return res.status(200).json(task)
+        const comments = await Comment.find({task_id: taskID})
+        return res.status(200).json({"task": task, "comments": comments})
 
     }
     catch(err) {
@@ -250,7 +255,7 @@ router.get('/:workspaceID/tasks/:taskID', checkAuth, checkWorkspaceAccess, async
 })
 
 
-router.put('/:workspaceID/tasks/:taskID',
+router.put('/:workspaceID/:taskID',
     checkAuth, checkWorkspaceAccess, checkSchema(updateTaskValidationSchema), handleValidationErrors,
     async function(req, res) {
         // Updates task fields. Any user present in the workspace can update task
@@ -272,7 +277,7 @@ router.put('/:workspaceID/tasks/:taskID',
 });
 
 
-router.delete('/:workspaceID/tasks/:taskID', checkAuth, checkWorkspaceAccess, async function(req, res) {
+router.delete('/:workspaceID/:taskID', checkAuth, checkWorkspaceAccess, async function(req, res) {
     // Deletes task. Any user present in the workspace can delete task
     // even if he is not the creator of the task
     const {taskID} = req.params
@@ -289,9 +294,10 @@ router.delete('/:workspaceID/tasks/:taskID', checkAuth, checkWorkspaceAccess, as
     }
 })
 
-// CRUD for comments
 
-router.post('/:workspaceID/tasks/:taskID/add_comment', 
+// Create and delete comment functions
+
+router.post('/:workspaceID/:taskID/add_comment', 
 checkAuth, checkWorkspaceAccess, checkSchema(commentValidationSchema), handleValidationErrors, 
 async function(req,res){
     // Adds a comment to a task
@@ -316,18 +322,8 @@ async function(req,res){
 
 })
 
-router.get('/:workspaceID/tasks/:taskID/comments', checkAuth, checkWorkspaceAccess, async function(req,res) {
-    const {taskID} = req.params
-    try {
-        const comments = await Comment.find({task_id: taskID})
-        return res.status(200).json(comments)
-    } catch(err) {
-        return res.status(500).json({error: "Internal Server Error"});
-    }
-})
 
-
-router.delete('/:workspaceID/tasks/:taskID/:commentID', 
+router.delete('/:workspaceID/:taskID/:commentID', 
 checkAuth, checkWorkspaceAccess, checkCommentOwnership,
 async function(req, res) {
     // Deletes a comment from the task. Only creator of the workspace
