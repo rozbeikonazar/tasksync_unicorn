@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const {hashPassword} = require('../helpers/users.js')
 const {registerUserValidationSchema} = require('../helpers/validationSchemas.js')
-const {validationResult , checkSchema, matchedData} = require('express-validator');
+const {checkSchema, matchedData} = require('express-validator');
 const passport = require('passport')
 const User = require('../mongoose/schemas/user.js');
 const checkAuth = require('../middlewares/checkAuth.js');
@@ -30,7 +30,7 @@ router.post('/register',
 checkSchema(registerUserValidationSchema), handleValidationErrors, 
 async (req, res, next) => {
   const data =  matchedData(req); 
-  
+
   try {
     data.password = await hashPassword(data.password);
     const newUser = new User(data);
