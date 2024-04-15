@@ -169,7 +169,7 @@ router.post('/:uuid/join', checkAuth, async function(req, res) {
         return res.status(200).json(joinToWorkspace)
     }   catch (err) {
         if (err.code === 11000) {
-            return res.status(422).json({ error: 'User is already a member of this workspace.'});
+            return res.status(400).json({ error: 'User is already a member of this workspace.'});
         }
         return res.status(500).json({error: "Internal server error"})
     
