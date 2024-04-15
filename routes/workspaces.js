@@ -116,7 +116,7 @@ router.delete("/:workspaceID", checkAuth, isWorkspaceCreator, async function(req
 // Logic related to Invintation
 
 router.post('/:workspaceID/generate_invintation',
-    isWorkspaceCreator, async function(req, res) {
+    checkAuth, isWorkspaceCreator, async function(req, res) {
         // generates a one-time invintation link to workspace
         // Only the creator of the workspace can generate them
         const invitationLink = `${HOST}${WORKSPACE_PREFIX}${uuidv4()}/join`;
