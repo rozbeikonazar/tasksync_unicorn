@@ -164,7 +164,7 @@ router.post('/:uuid/join', checkAuth, async function(req, res) {
         // this link should be deleted
         const result = await Invintation.deleteOne(invitation._id)
         if (!result) {
-            return res.status(500).json({error: "Internal server error"})
+            console.error(result)
         }
         return res.status(200).json(joinToWorkspace)
     }   catch (err) {
