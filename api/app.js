@@ -6,6 +6,7 @@ const workspaces = require('./routes/workspaces')
 const session = require('express-session');
 const passport = require('passport');
 const mongoose = require('mongoose');
+const cors = require('cors');
 require('./strategies/local-strategy');
 
 const COOKIE_SECRET = process.env.COOKIE_SECRET || "cookie_secret";
@@ -18,7 +19,7 @@ mongoose
   .then(() => console.log("Connected to DB"))
   .catch((err) => console.log(`Error: ${err}`));
 
-
+app.use(cors());
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
