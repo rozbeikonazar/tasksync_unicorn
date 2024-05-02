@@ -11,6 +11,7 @@ require('./strategies/local-strategy');
 
 const COOKIE_SECRET = process.env.COOKIE_SECRET || "cookie_secret";
 const SESSION_SECRET = process.env.SESSION_SECRET || "session_secret";
+const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || 'http://localhost:5173';
 
 const app = express();
 
@@ -19,7 +20,10 @@ mongoose
   .then(() => console.log("Connected to DB"))
   .catch((err) => console.log(`Error: ${err}`));
 
-app.use(cors());
+app.use(cors({
+  origin: FRONTEND_ORIGIN,
+  credentials: true
+}));
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -30,6 +34,7 @@ app.use(session({
   resave: false,
   cookie: {
     maxAge: 60000 * 60,
+    secure: false
   },
 })
 )
