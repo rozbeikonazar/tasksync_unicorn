@@ -12,7 +12,7 @@ const handleValidationErrors = require("../middlewares/handleValidationErrors.js
 
 router.post('/login', passport.authenticate('local'), function(req, res) {
   // Check user credentials and set auth cookies for him
-  return res.status(200).json({ message: 'Login successful' });
+  return res.status(200).json({ message: 'Login successful', user: req.user });
 });
 
 router.post('/logout', (req,res) => {
