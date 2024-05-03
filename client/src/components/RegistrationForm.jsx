@@ -40,6 +40,7 @@ export function RegistrationForm() {
                 headers: {
                     'Content-Type': 'application/json',
                 },
+                credentials: "include",
                 body: JSON.stringify(registrationData)
             });
             if (response.ok) {

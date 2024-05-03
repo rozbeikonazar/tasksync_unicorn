@@ -35,6 +35,7 @@ export function LoginForm() {
         headers: {
           "Content-Type": "application/json"
         },
+        credentials: "include",
         body: JSON.stringify(loginData)
       });
       if (response.ok) {
