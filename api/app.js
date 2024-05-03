@@ -1,5 +1,4 @@
 const express = require('express');
-const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const users = require('./routes/users');
 const workspaces = require('./routes/workspaces')
@@ -11,7 +10,7 @@ require('./strategies/local-strategy');
 
 const COOKIE_SECRET = process.env.COOKIE_SECRET || "cookie_secret";
 const SESSION_SECRET = process.env.SESSION_SECRET || "session_secret";
-const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || 'http://localhost:5173';
+const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || 'https://tasksync-unicorn2.onrender.com';
 
 const app = express();
 
@@ -20,21 +19,24 @@ mongoose
   .then(() => console.log("Connected to DB"))
   .catch((err) => console.log(`Error: ${err}`));
 
+
 app.use(cors({
-  origin: FRONTEND_ORIGIN,
-  credentials: true
+  origin: FRONTEND_ORIGIN, 
+  credentials: true,
 }));
+
+
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser(COOKIE_SECRET));
+//app.use(cookieParser(COOKIE_SECRET));
 app.use(session({
   secret: SESSION_SECRET,
   saveUninitialized: false,
   resave: false,
   cookie: {
     maxAge: 60000 * 60,
-    secure: false
+    sameSite: 'none'
   },
 })
 )
