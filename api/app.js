@@ -10,8 +10,7 @@ require('./strategies/local-strategy');
 
 const COOKIE_SECRET = process.env.COOKIE_SECRET || "cookie_secret";
 const SESSION_SECRET = process.env.SESSION_SECRET || "session_secret";
-const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || 'https://tasksync-unicorn2.onrender.com';
-
+const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || 'http://localhost:5173';
 const app = express();
 
 mongoose
@@ -36,7 +35,9 @@ app.use(session({
   resave: false,
   cookie: {
     maxAge: 60000 * 60,
-    sameSite: 'none'
+    sameSite: 'none',
+    secure: false
+
   },
 })
 )
