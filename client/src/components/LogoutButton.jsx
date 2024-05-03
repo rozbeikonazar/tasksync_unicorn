@@ -2,11 +2,11 @@ import React, { useContext } from "react";
 import { UserContext } from "../utils/contexts/UserContext";
 
 export function LogoutButton() {
-  const { setIsLoggedIn } = useContext(UserContext);
+  const userContextData = useContext(UserContext);
 
   const handleLogout = async () => {
     try {
-      const response = await fetch("https://localhost:3000/api/user/logout", {
+      const response = await fetch("http://localhost:3000/api/user/logout", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -15,7 +15,10 @@ export function LogoutButton() {
       });
 
       if (response.ok) {
-        setIsLoggedIn(false); // Update user context to reflect logout
+        userContextData.setUserData((currentState) => ({
+          ...currentState,
+          isLoggedIn: false          
+        })) // Update user context to reflect logout
         console.log("Logged out successfully!");
       } else {
         console.error("Logout failed:", response.statusText);
