@@ -30,7 +30,7 @@ export function LoginForm() {
     }
 
     try {
-      const response = await fetch("https://tasksync-unicorn-backend.onrender.com", {
+      const response = await fetch("https://tasksync-unicorn-backend.onrender.com/api/user/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
