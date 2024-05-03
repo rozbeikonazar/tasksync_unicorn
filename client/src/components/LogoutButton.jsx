@@ -6,7 +6,7 @@ export function LogoutButton() {
 
   const handleLogout = async () => {
     try {
-      const response = await fetch("https://tasksync-unicorn-backend.onrender.com/api/user/logout", {
+      const response = await fetch("https://tasksync-unicorn-backend.onrender.com/api/users/logout", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
