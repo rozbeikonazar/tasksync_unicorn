@@ -34,7 +34,8 @@ export function RegistrationForm() {
         }
 
         try {
-            const response = await fetch('https://tasksync-unicorn-backend.onrender.com/api/users/register', {
+            tasksync-unicorn-backend.onrender.com
+            const response = await fetch('https://localhost:3000/api/user/register', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
