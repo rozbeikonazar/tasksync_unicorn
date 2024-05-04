@@ -1,0 +1,12 @@
+.alert-popup-container {
+    position: fixed;
+    top: 0;
+    left: calc(50% - 150px); /* Adjust left position */
+    z-index: 1100;
+  }
+  
+  .alert-popup {
+    position: relative;
+    width: 300px;
+  }
+  
