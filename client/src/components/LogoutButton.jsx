@@ -1,8 +1,10 @@
-import React, { useContext } from "react";
+import React, { useContext} from "react";
+import { useNavigate } from "react-router-dom";
 import { UserContext } from "../utils/contexts/UserContext";
 
 export function LogoutButton() {
   const userContextData = useContext(UserContext);
+  const navigate = useNavigate();
 
   const handleLogout = async () => {
     try {
@@ -19,7 +21,9 @@ export function LogoutButton() {
           ...currentState,
           isLoggedIn: false          
         })) // Update user context to reflect logout
-        console.log("Logged out successfully!");
+        navigate('/')
+        
+
       } else {
         console.error("Logout failed:", response.statusText);
       }
@@ -29,6 +33,8 @@ export function LogoutButton() {
   };
 
   return (
-    <button onClick={handleLogout}>Logout</button>
+    <div className={"inputContainer"}>
+    <button onClick={handleLogout} className="btn">Logout</button>
+    </div>
   );
 }
