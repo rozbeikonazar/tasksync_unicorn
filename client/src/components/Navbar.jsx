@@ -16,7 +16,7 @@ export function Navbar() {
           {isLoggedIn ? (
             <>
               <span className="navbar-text mr-2">Hello, {displayName}</span>
-              <div style={{ marginLeft: "10px" }}> {/* Add margin to separate button */}
+              <div style={{ marginLeft: "10px" }}> {/* Add proper stlyes to this button */}
                 <LogoutButton />
               </div>
             </>
