@@ -1,7 +1,7 @@
 .alert-popup-container {
     position: fixed;
     top: 0;
-    left: calc(50% - 150px); /* Adjust left position */
+    left: calc(50% - 150px);
     z-index: 1100;
   }
   
