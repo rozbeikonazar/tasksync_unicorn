@@ -1,7 +1,10 @@
 import { useState } from "react";
 import "../App.css";
+import { useNavigate } from "react-router-dom";
 
 export function RegistrationForm() {
+    const navigate = useNavigate();
+
     const [registrationData, setRegistrationData] = useState({
         "username": "",
         "password": "",
@@ -11,6 +14,7 @@ export function RegistrationForm() {
     const [usernameError, setUsernameError] = useState('')
     const [passwordError, setPasswordError] = useState('')
     const [error, setError] = useState('');
+    const [successMessage, setSuccessMessage] = useState('')
 
     const handleSubmit = async (event) => {
         event.preventDefault();
@@ -18,6 +22,7 @@ export function RegistrationForm() {
         setUsernameError("");
         setPasswordError("");
         setError("");
+        setSuccessMessage("");
 
         // Validation
         if (!registrationData.display_name) {
@@ -34,7 +39,6 @@ export function RegistrationForm() {
         }
 
         try {
-            tasksync-unicorn-backend.onrender.com
             const response = await fetch('http://localhost:3000/api/user/register', {
                 method: 'POST',
                 headers: {
@@ -44,8 +48,8 @@ export function RegistrationForm() {
                 body: JSON.stringify(registrationData)
             });
             if (response.ok) {
-                const data = await response.json();
-                // registration successful
+                navigate('/login')
+
             } else {
                 setError("Registration failed");
                 console.log(data.message);
@@ -63,7 +67,7 @@ export function RegistrationForm() {
        
         <form onSubmit={handleSubmit}>
             <div className={"inputContainer"}>
-                <label htmlFor="name">Name</label>
+                <label htmlFor="display_name">Name</label>
                 <input
                     type="text"
                     id="name"
@@ -115,7 +119,7 @@ export function RegistrationForm() {
             </div>
             
             <div className={"inputContainer"}>
-                <button type="submit" className={"inputButton"}>Register</button>
+                <button type="submit" className={"btn"}>Register</button>
             </div>
         </form>
     </div>
