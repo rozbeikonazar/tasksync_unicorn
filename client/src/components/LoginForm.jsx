@@ -1,9 +1,11 @@
 import { useContext, useState } from "react";
 import "../App.css";
 import { UserContext } from "../utils/contexts/UserContext";
+import { useNavigate } from 'react-router-dom';
 
 export function LoginForm() {
   const userContextData = useContext(UserContext)
+  const navigate = useNavigate();
   const [loginData, setLoginData] = useState({
     username: "",
     password: ""
@@ -47,7 +49,7 @@ export function LoginForm() {
           username: data.user.username,
           isLoggedIn: true          
         }))
-        // login successful, navigate to the desired page
+        navigate("/");
       } else {
         setError("Invalid username or password");
       }
@@ -96,7 +98,7 @@ export function LoginForm() {
 
         </div>
         <div className={"inputContainer"}>
-          <button type="submit" className={"inputButton"}>
+          <button type="submit" className={"btn"}>
             Log in
           </button>
         </div>
