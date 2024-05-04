@@ -1,9 +1,12 @@
 import { useState } from "react";
 import "../App.css";
 import { useNavigate } from "react-router-dom";
+import useAlert from "../utils/hooks/useAlert";
 
 export function RegistrationForm() {
     const navigate = useNavigate();
+    const {setAlert} = useAlert();
+
 
     const [registrationData, setRegistrationData] = useState({
         "username": "",
@@ -14,7 +17,6 @@ export function RegistrationForm() {
     const [usernameError, setUsernameError] = useState('')
     const [passwordError, setPasswordError] = useState('')
     const [error, setError] = useState('');
-    const [successMessage, setSuccessMessage] = useState('')
 
     const handleSubmit = async (event) => {
         event.preventDefault();
@@ -22,9 +24,6 @@ export function RegistrationForm() {
         setUsernameError("");
         setPasswordError("");
         setError("");
-        setSuccessMessage("");
-
-        // Validation
         if (!registrationData.display_name) {
             setNameError("Please enter a name");
             return;
@@ -48,6 +47,7 @@ export function RegistrationForm() {
                 body: JSON.stringify(registrationData)
             });
             if (response.ok) {
+                setAlert('Registration success!', 'success')
                 navigate('/login')
 
             } else {

@@ -1,10 +1,12 @@
 import React, { useContext} from "react";
 import { useNavigate } from "react-router-dom";
 import { UserContext } from "../utils/contexts/UserContext";
+import useAlert from "../utils/hooks/useAlert";
 
 export function LogoutButton() {
   const userContextData = useContext(UserContext);
   const navigate = useNavigate();
+  const {setAlert} = useAlert();
 
   const handleLogout = async () => {
     try {
@@ -21,14 +23,12 @@ export function LogoutButton() {
           ...currentState,
           isLoggedIn: false          
         })) // Update user context to reflect logout
+        setAlert('Logout success!', 'success')
         navigate('/')
         
-
-      } else {
-        console.error("Logout failed:", response.statusText);
       }
     } catch (error) {
-      console.error("Network error:", error);
+      setAlert("Logout error. Try again", "error");
     }
   };
 

@@ -2,10 +2,12 @@ import { useContext, useState } from "react";
 import "../App.css";
 import { UserContext } from "../utils/contexts/UserContext";
 import { useNavigate } from 'react-router-dom';
+import useAlert from "../utils/hooks/useAlert.js";
 
 export function LoginForm() {
   const userContextData = useContext(UserContext)
   const navigate = useNavigate();
+  const {setAlert} = useAlert();
   const [loginData, setLoginData] = useState({
     username: "",
     password: ""
@@ -49,12 +51,13 @@ export function LoginForm() {
           username: data.user.username,
           isLoggedIn: true          
         }))
+        setAlert('Login success!', 'success');
         navigate("/");
       } else {
         setError("Invalid username or password");
       }
-    } catch (error) {
-      console.error("Network error");
+    } catch (err) {
+      setAlert("Error occured while loging in, Please try again", 'error');    
     }
   };
 
