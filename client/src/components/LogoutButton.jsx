@@ -33,8 +33,8 @@ export function LogoutButton() {
   };
 
   return (
-    <div className={"inputContainer"}>
-    <button onClick={handleLogout} className="btn">Logout</button>
+    <div className='bg-red-500 text-white py-1 px-2 rounded-lg'>
+    <button onClick={handleLogout} className="btn btn-link">Logout</button>
     </div>
   );
 }

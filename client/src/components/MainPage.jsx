@@ -1,20 +1,14 @@
-import { useContext} from "react"
-
-import { Navbar } from "./Navbar";
+import { useContext, useState} from "react"
 import { UserWorkspacesList } from "./UserWorkspacesList";
 import { UserContext } from "../utils/contexts/UserContext";
-import "../styles/MainPage.css"
+// import "../styles/MainPage.css"
+import { ManageWorkspace } from "./ManageWorkspace";
 
 export function MainPage(){
     const { isLoggedIn} = useContext(UserContext);
     return (
-        <div className="main-page-container">
-          <div>
-            <Navbar />
-          </div>
-          <div className="workspace-list-container">
-            {isLoggedIn && <UserWorkspacesList />}
-          </div>
+        <div className="container mx-auto pt-24">
+            {isLoggedIn && <UserWorkspacesList/>}
         </div>
       );
     

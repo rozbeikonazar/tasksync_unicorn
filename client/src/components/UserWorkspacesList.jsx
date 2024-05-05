@@ -1,9 +1,9 @@
 import React, { useContext, useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import { UserContext } from "../utils/contexts/UserContext";
-import "../styles/workspace.css";
-import { QuitWorkspaceButton } from "./QuitWorkspaceButton";
-
+import { UserWorkspace } from "./UserWorkspace";
+import { JoinedWorkspace } from "./JoinedWorkspace";
+import { JoinWorkspaceButton } from "./JoinWorkspaceButton";
+import { CreateWorkspaceButton } from "./CreateWorkspaceButton";
 export function UserWorkspacesList() {
   const userContextData = useContext(UserContext);
   const [userWorkspaces, setUserWorkspaces] = useState([]);
@@ -20,15 +20,19 @@ export function UserWorkspacesList() {
         });
         if (response.ok) {
           const data = await response.json();
-          const userWorkspaces = data.filter(workspace => workspace.creator_id == userContextData.id);
-          const joinedWorkspaces = data.filter(workspace => workspace.creator_id != userContextData.id);
+          const userWorkspaces = data.filter(
+            (workspace) => workspace.creator_id == userContextData.id
+          );
+          const joinedWorkspaces = data.filter(
+            (workspace) => workspace.creator_id != userContextData.id
+          );
           setUserWorkspaces(userWorkspaces);
           setJoinedWorkspaces(joinedWorkspaces);
         } else {
           userContextData.setUserData((currentState) => ({
             ...currentState,
-            isLoggedIn: false          
-          }))
+            isLoggedIn: false,
+          }));
         }
       } catch (error) {
         console.error("Network error: ");
@@ -39,27 +43,26 @@ export function UserWorkspacesList() {
   }, []);
 
   return (
-    <div>
-      <h3>User Workspaces</h3>
-      <div className="workspace-list-container">      
+    <div className="">
+      <div className="flex justify-between mb-5">
+        <JoinWorkspaceButton />
+        <CreateWorkspaceButton />
+      </div>
+
+      <h3 className="text-2xl font-semibold mb-5">User Workspaces</h3>
+      <div className="grid grid-cols-4 gap-3 mb-10">
         {userWorkspaces.map((workspace) => (
-          <div key={workspace._id} className="user-workspace-container">
-            <h3>{workspace.name}</h3>
-            <Link to={`/workspace/${workspace._id}`} className="btn">
-              Join
-            </Link>
-            
+          <div key={workspace._id}>
+            <UserWorkspace workspace={workspace} />
           </div>
         ))}
-        <h2> Joined workspaces</h2>
-        {joinedWorkspaces.map((workspace) => (
-          <div key={workspace._id} className="user-workspace-container">
-            <h3>{workspace.name}</h3>
-            <Link to={`/workspace/${workspace._id}`} className="btn">
-              Join
-            </Link>
-            <QuitWorkspaceButton workspaceID={workspace._id} />
+      </div>
 
+      <h3 className="text-2xl font-semibold mb-5">Joined Workspaces</h3>
+      <div className="grid grid-cols-4 gap-3 mb-10">
+        {joinedWorkspaces.map((workspace) => (
+          <div key={workspace._id}>
+            <JoinedWorkspace workspace={workspace} />
           </div>
         ))}
       </div>
