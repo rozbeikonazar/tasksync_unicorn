@@ -1,0 +1,25 @@
+version: "3.8"
+services:
+  backend:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: tasksync_api
+    ports:
+      - "3000:3000"
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/tasksync
+
+  frontend:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: tasksync_client
+    ports:
+      - "5173:5173"
+
+  mongo:
+    image: mongo:latest
+    container_name: tasksync_mongo
+    ports:
+      - "27017:27017"
