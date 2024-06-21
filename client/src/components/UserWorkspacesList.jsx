@@ -4,6 +4,7 @@ import { UserWorkspace } from "./UserWorkspace";
 import { JoinedWorkspace } from "./JoinedWorkspace";
 import { JoinWorkspaceButton } from "./JoinWorkspaceButton";
 import { CreateWorkspaceButton } from "./CreateWorkspaceButton";
+import { API_URL } from "../config";
 export function UserWorkspacesList() {
   const userContextData = useContext(UserContext);
   const [userWorkspaces, setUserWorkspaces] = useState([]);
@@ -12,7 +13,7 @@ export function UserWorkspacesList() {
   useEffect(() => {
     async function fetchWorkspaces() {
       try {
-        const response = await fetch("http://localhost:3000/api/workspaces", {
+        const response = await fetch(`${API_URL}/api/workspaces`, {
           headers: {
             "Content-Type": "application/json",
           },

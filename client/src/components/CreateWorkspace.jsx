@@ -1,5 +1,6 @@
 import { useState } from "react";
 import useAlert from "../utils/hooks/useAlert";
+import { API_URL } from "../config";
 export function CreateWorkspace({ setIsOpened }) {
   const [workspaceName, setWorkspaceName] = useState("");
   const { setAlert } = useAlert();
@@ -11,7 +12,7 @@ export function CreateWorkspace({ setIsOpened }) {
     }
     const newWorkspace = { name: workspaceName };
     try {
-      const response = await fetch("http://localhost:3000/api/workspaces/", {
+      const response = await fetch(`${API_URL}/api/workspaces/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

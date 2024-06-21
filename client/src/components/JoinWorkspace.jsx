@@ -4,7 +4,7 @@ import useAlert from "../utils/hooks/useAlert";
 export function JoinWorkspace({ setIsOpened }) {
   const [invintationLink, setInvintationLink] = useState("");
   const invitationLinkRegex =
-    /^localhost:3000\/api\/workspaces\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\/join$/;
+    /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/;
 
   const { setAlert } = useAlert();
   const handleSubmit = async (event) => {
@@ -20,7 +20,7 @@ export function JoinWorkspace({ setIsOpened }) {
     }
 
     try {
-      const response = await fetch(`http://${invintationLink}`, {
+      const response = await fetch(`${invintationLink}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

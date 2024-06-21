@@ -1,5 +1,6 @@
 import { useState } from "react";
 import useAlert from "../utils/hooks/useAlert";
+import { API_URL } from "../config";
 
 export function CommentSection({ taskObj }) {
   const [comment, setComment] = useState("");
@@ -12,7 +13,7 @@ export function CommentSection({ taskObj }) {
     console.log("New comm", newComment);
     try {
       const response = await fetch(
-        `http://localhost:3000/api/workspaces/${taskObj.workspace_id}/${taskObj._id}/add_comment`,
+        `${API_URL}/api/workspaces/${taskObj.workspace_id}/${taskObj._id}/add_comment`,
         {
           method: "POST",
           headers: {

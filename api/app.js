@@ -6,19 +6,20 @@ const session = require("express-session");
 const passport = require("passport");
 const mongoose = require("mongoose");
 const cors = require("cors");
+const {
+  FRONTEND_ORIGIN,
+  SESSION_SECRET,
+  COOKIE_SECRET,
+  MONGO_URI,
+} = require("./config");
 require("./strategies/local-strategy");
 
-const COOKIE_SECRET = process.env.COOKIE_SECRET || "cookie_secret";
-const SESSION_SECRET = process.env.SESSION_SECRET || "session_secret";
-const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || "http://localhost:5173";
-const mongoURI = process.env.MONGO_URI || "mongodb://localhost:27017/tasksync";
 const app = express();
 
 mongoose
-  .connect(mongoURI)
+  .connect(MONGO_URI)
   .then(() => console.log("Connected to DB"))
   .catch((err) => console.log(`Error: ${err}`));
-
 app.use(
   cors({
     origin: FRONTEND_ORIGIN,
@@ -37,8 +38,8 @@ app.use(
     resave: false,
     cookie: {
       maxAge: 60000 * 60,
-      sameSite: "none",
-      secure: false,
+      sameSite: "None",
+      secure: true,
     },
   })
 );

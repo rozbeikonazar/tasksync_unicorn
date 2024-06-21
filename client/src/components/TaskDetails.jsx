@@ -3,6 +3,7 @@ import useAlert from "../utils/hooks/useAlert";
 import { UserContext } from "../utils/contexts/UserContext";
 import { useNavigate } from "react-router-dom";
 import { CommentSection } from "./CommentSection";
+import { API_URL } from "../config";
 
 export function TaskDetails({ taskObj, setIsOpened }) {
   const [taskData, setTaskData] = useState(taskObj);
@@ -16,7 +17,7 @@ export function TaskDetails({ taskObj, setIsOpened }) {
     const updatedTask = { ...taskObj, ...taskData };
     try {
       const response = await fetch(
-        `http://localhost:3000/api/workspaces/${taskObj.workspace_id}/${taskObj._id}`,
+        `${API_URL}/api/workspaces/${taskObj.workspace_id}/${taskObj._id}`,
         {
           method: "PUT",
           headers: {
@@ -39,7 +40,7 @@ export function TaskDetails({ taskObj, setIsOpened }) {
     event.preventDefault();
     try {
       const response = await fetch(
-        `http://localhost:3000/api/workspaces/${taskObj.workspace_id}/${taskObj._id}`,
+        `${API_URL}/api/workspaces/${taskObj.workspace_id}/${taskObj._id}`,
         {
           method: "DELETE",
           headers: {
@@ -62,7 +63,7 @@ export function TaskDetails({ taskObj, setIsOpened }) {
     async function fetchComments() {
       try {
         const response = await fetch(
-          `http://localhost:3000/api/workspaces/${taskObj.workspace_id}/${taskObj._id}`,
+          `${API_URL}/api/workspaces/${taskObj.workspace_id}/${taskObj._id}`,
           {
             headers: {
               "Content-Type": "application/json",

@@ -4,6 +4,7 @@ import { UserContext } from "../utils/contexts/UserContext";
 import useAlert from "../utils/hooks/useAlert";
 import { TaskList } from "./TaskList";
 import { CreateTask } from "./CreateTask";
+import { API_URL } from "../config";
 
 export function AccessWorkspace() {
   const { workspaceID } = useParams();
@@ -21,7 +22,7 @@ export function AccessWorkspace() {
     async function fetchTasks() {
       try {
         const response = await fetch(
-          `http://localhost:3000/api/workspaces/${workspaceID}`,
+          `${API_URL}/api/workspaces/${workspaceID}`,
           {
             headers: {
               "Content-Type": "application/json",

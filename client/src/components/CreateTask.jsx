@@ -2,7 +2,7 @@ import { useState, useContext } from "react";
 import useAlert from "../utils/hooks/useAlert";
 import { UserContext } from "../utils/contexts/UserContext";
 import { useParams } from "react-router-dom";
-
+import { API_URL } from "../config";
 export function CreateTask({ setIsOpened }) {
   const { workspaceID } = useParams();
   const { setAlert } = useAlert();
@@ -26,7 +26,7 @@ export function CreateTask({ setIsOpened }) {
     // }
     try {
       const response = await fetch(
-        `http://localhost:3000/api/workspaces/${workspaceID}/add_task`,
+        `${API_URL}/api/workspaces/${workspaceID}/add_task`,
         {
           method: "POST",
           headers: {

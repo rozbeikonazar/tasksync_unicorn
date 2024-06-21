@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import useAlert from "../utils/hooks/useAlert";
+import { API_URL } from "../config";
 
 export function ManageWorkspace({ workspaceObj, setIsOpened }) {
   const { setAlert } = useAlert();
@@ -11,7 +12,7 @@ export function ManageWorkspace({ workspaceObj, setIsOpened }) {
     const newWorkspace = { ...workspaceObj, name: workspaceName };
     try {
       const response = await fetch(
-        `http://localhost:3000/api/workspaces/${workspaceObj._id}`,
+        `${API_URL}/api/workspaces/${workspaceObj._id}`,
         {
           method: "PUT",
           headers: {
@@ -32,7 +33,7 @@ export function ManageWorkspace({ workspaceObj, setIsOpened }) {
   const handleDelete = async (event) => {
     try {
       const response = await fetch(
-        `http://localhost:3000/api/workspaces/${workspaceObj._id}`,
+        `${API_URL}/api/workspaces/${workspaceObj._id}`,
         {
           method: "DELETE",
           headers: {
@@ -52,7 +53,7 @@ export function ManageWorkspace({ workspaceObj, setIsOpened }) {
   const handleGenerate = async (event) => {
     try {
       const response = await fetch(
-        `http://localhost:3000/api/workspaces/${workspaceObj._id}/generate_invintation`,
+        `${API_URL}/api/workspaces/${workspaceObj._id}/generate_invintation`,
         {
           method: "POST",
           headers: {

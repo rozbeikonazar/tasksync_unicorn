@@ -1,5 +1,6 @@
 import useAlert from "../utils/hooks/useAlert";
 import { Link } from "react-router-dom";
+import { API_URL } from "../config";
 
 export function JoinedWorkspace({ workspace }) {
   const { setAlert } = useAlert();
@@ -7,7 +8,7 @@ export function JoinedWorkspace({ workspace }) {
   const handleQuit = async () => {
     try {
       const response = await fetch(
-        `http://localhost:3000/api/workspaces/${workspace._id}/quit`,
+        `${API_URL}/api/workspaces/${workspace._id}/quit`,
         {
           method: "DELETE",
           headers: {
